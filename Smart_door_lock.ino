@@ -10,6 +10,11 @@ Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 #define echoPin 2 // pin echo
 #define trigPin 3 // pin trig
 
+int irsensor = 6;
+int valueirsensor = 0;
+
+int state = 0;
+
 Servo myservo;
 Servo myservo2;
 
@@ -25,6 +30,7 @@ void setup() {
   myservo2.attach(10);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  pinMode(irsensor, INPUT);
 
   lcd.begin(); //kalu error tukar lcd.init();
   lcd.backlight();
@@ -45,6 +51,7 @@ void setup() {
 void loop() {
   Serial.print ("Temp = ");
   Serial.println(mlx.readObjectTempC());
+  valueirsensor = digitalRead(irsensor);
   ultrasonic();
 
   temp = mlx.readObjectTempC();
@@ -52,8 +59,15 @@ void loop() {
 
   Lcd();
 
+  if (valueirsensor == LOW){
+    state = 1;
+    }
+  else{
+    state = 0;
+    }
+
   // utk temp
-  if (temp <= 37){
+  if (temp <= 37 && state == 1){
     myservo.write(90);
     lcd.setCursor(0, 4);
     lcd.print("       ");
