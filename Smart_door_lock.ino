@@ -2,7 +2,6 @@
 #include <Servo.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
-#include <TimerOne.h>
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -16,6 +15,7 @@ int valueirsensor = 0;
 
 int state = 0;
 int state2 = 0;
+int Var = 0;
 
 Servo myservo;
 Servo myservo2;
@@ -33,8 +33,6 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(irsensor, INPUT);
-  Timer1.initialize(5000000);
-  Timer1.attachInterrupt(runninglcd); // blinkLED to run every 0.15 seconds
   
 
   lcd.begin(); //kalu error tukar lcd.init();
@@ -59,21 +57,43 @@ void loop() {
   valueirsensor = digitalRead(irsensor);
   ultrasonic();
 
-  temp = mlx.readObjectTempC();
-  tempDisplay = mlx.readObjectTempC();
-
-  Serial.println(tempDisplay);
 
   if (valueirsensor == LOW){
     state = 1;
-    state2 = 1;
+    if (state2 == 0){
+      Var = 1;
+      state2 = 1;
+      }
     }
   else{
     state = 0;
-    state2 = 0;
     }
 
-  // utk temp
+
+  switch (Var) {
+  case 1:
+
+   for (int i = 0; i <= 100; i++){
+    temp = mlx.readObjectTempC();
+    tempDisplay = mlx.readObjectTempC();
+
+    Serial.println(tempDisplay);
+
+    lcd.setCursor(4, 0);
+    lcd.print("       ");
+    lcd.setCursor(4, 0);
+    lcd.print("WELCOME");
+    lcd.setCursor(1, 1);
+    lcd.print("Temp = ");
+    lcd.setCursor(8, 1);
+    lcd.print(tempDisplay, 1);
+    }
+
+    Var = 2;
+    
+    break;
+  case 2:
+      // utk temp
   if (temp <= 37 && state == 1){
     myservo.write(90);
     lcd.setCursor(4, 0);
@@ -82,6 +102,7 @@ void loop() {
     lcd.print("OPEN");
     delay(5000); // 5 sec
     myservo.write(0);
+    Var = 3;
     }
   if (temp >= 37 && state == 1) {
     lcd.setCursor(4, 0);
@@ -90,7 +111,23 @@ void loop() {
     lcd.print("CLOSE");
     myservo.write(0);
     delay(1000);
+    Var = 3;
     }
+    break;
+  case 3:
+    delay(3000);
+    lcd.setCursor(4, 0);
+    lcd.print("       ");
+    lcd.setCursor(4, 0);
+    lcd.print("WELCOME");
+    lcd.setCursor(1, 1);
+    lcd.print("Temp = ");
+    lcd.setCursor(8, 1);
+    lcd.print("               ");
+    Var = 0;
+    state2 = 0;
+    break;
+  }
 
   // utk ultrasonic
   if (distance <= 7){
@@ -101,9 +138,6 @@ void loop() {
 
 }
 
-void runninglcd(void){
-  Lcd();
-  }
 
 void ultrasonic(){
   digitalWrite(trigPin, LOW);
@@ -113,22 +147,4 @@ void ultrasonic(){
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = duration * 0.034 / 2;
-  }
-
-void Lcd(){
-  lcd.setCursor(4, 0);
-  lcd.print("       ");
-  lcd.setCursor(4, 0);
-  lcd.print("WELCOME");
-  if (state2 == 1){
-    lcd.setCursor(1, 1);
-    lcd.print("Temp = ");
-    lcd.setCursor(8, 1);
-    lcd.print(tempDisplay, 1);
-    }
-  else {
-    lcd.setCursor(1, 1);
-    lcd.print("            ");
-    }
-  
   }
