@@ -2,6 +2,7 @@
 #include <Servo.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
+#include <TimerOne.h>
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -32,6 +33,9 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(irsensor, INPUT);
+  Timer1.initialize(5000000);
+  Timer1.attachInterrupt(runninglcd); // blinkLED to run every 0.15 seconds
+  
 
   lcd.begin(); //kalu error tukar lcd.init();
   lcd.backlight();
@@ -59,9 +63,6 @@ void loop() {
   tempDisplay = mlx.readObjectTempC();
 
   Serial.println(tempDisplay);
-
-  Lcd();
-  delay(500);
 
   if (valueirsensor == LOW){
     state = 1;
@@ -100,6 +101,10 @@ void loop() {
 
 }
 
+void runninglcd(void){
+  Lcd();
+  }
+
 void ultrasonic(){
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -122,9 +127,8 @@ void Lcd(){
     lcd.print(tempDisplay, 1);
     }
   else {
-    delay(2000);
     lcd.setCursor(1, 1);
-    lcd.print("          ");
+    lcd.print("            ");
     }
   
   }
