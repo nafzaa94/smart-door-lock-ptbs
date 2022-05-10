@@ -14,6 +14,7 @@ int irsensor = 6;
 int valueirsensor = 0;
 
 int state = 0;
+int state2 = 0;
 
 Servo myservo;
 Servo myservo2;
@@ -57,29 +58,34 @@ void loop() {
   temp = mlx.readObjectTempC();
   tempDisplay = mlx.readObjectTempC();
 
+  Serial.println(tempDisplay);
+
   Lcd();
+  delay(500);
 
   if (valueirsensor == LOW){
     state = 1;
+    state2 = 1;
     }
   else{
     state = 0;
+    state2 = 0;
     }
 
   // utk temp
   if (temp <= 37 && state == 1){
     myservo.write(90);
-    lcd.setCursor(0, 4);
+    lcd.setCursor(4, 0);
     lcd.print("       ");
-    lcd.setCursor(0, 4);
+    lcd.setCursor(4, 0);
     lcd.print("OPEN");
     delay(5000); // 5 sec
     myservo.write(0);
     }
-  else {
-    lcd.setCursor(0, 4);
+  if (temp >= 37 && state == 1) {
+    lcd.setCursor(4, 0);
     lcd.print("       ");
-    lcd.setCursor(0, 4);
+    lcd.setCursor(4, 0);
     lcd.print("CLOSE");
     myservo.write(0);
     delay(1000);
@@ -105,12 +111,20 @@ void ultrasonic(){
   }
 
 void Lcd(){
-  lcd.setCursor(0, 4);
+  lcd.setCursor(4, 0);
   lcd.print("       ");
-  lcd.setCursor(0, 4);
+  lcd.setCursor(4, 0);
   lcd.print("WELCOME");
-  lcd.setCursor(1, 1);
-  lcd.print("Temp = ");
-  lcd.setCursor(1, 8);
-  lcd.print(tempDisplay, 1);
+  if (state2 == 1){
+    lcd.setCursor(1, 1);
+    lcd.print("Temp = ");
+    lcd.setCursor(8, 1);
+    lcd.print(tempDisplay, 1);
+    }
+  else {
+    delay(2000);
+    lcd.setCursor(1, 1);
+    lcd.print("          ");
+    }
+  
   }
